@@ -30,6 +30,13 @@ from timm.utils import ApexScaler, NativeScaler
 from checkpoint_saver import CheckpointSaver
 from labeled_memcached_dataset import McDataset
 
+## import custom model
+from models.build_model import build_model
+
+'''
+bash train.sh 2 --data /mldisk2/jskim/dataset/imagenet/ --model CSWin_64_12211_tiny_224 -b 64 --lr 2e-3 --weight-decay .05 --amp --img-size 224 --warmup-epochs 20 --model-ema-decay 0.99984 --drop-path 0.2
+bash train.sh 2 --data /mldisk2/jskim/dataset/imagenet/ --model shinepost_v1 -b 64 --lr 2e-3 --weight-decay .05 --amp --img-size 224 --warmup-epochs 20 --model-ema-decay 0.99984 --drop-path 0.2
+'''
 torch.backends.cudnn.benchmark = True
 _logger = logging.getLogger('train')
 
@@ -109,7 +116,7 @@ parser.add_argument('--warmup-lr', type=float, default=1e-6, metavar='LR',
                     help='warmup learning rate (default: 0.0001)')
 parser.add_argument('--min-lr', type=float, default=1e-5, metavar='LR',
                     help='lower lr bound for cyclic schedulers that hit 0 (1e-5)')
-parser.add_argument('--epochs', type=int, default=300, metavar='N',
+parser.add_argument('--epochs', type=int, default=90, metavar='N',
                     help='number of epochs to train (default: 2)')
 parser.add_argument('--start-epoch', default=None, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -296,21 +303,24 @@ def main():
 
     torch.manual_seed(args.seed + args.rank)
 
-    model = create_model(
-        args.model,
-        pretrained=args.pretrained,
-        num_classes=args.num_classes,
-        drop_rate=args.drop,
-        drop_connect_rate=args.drop_connect,  # DEPRECATED, use drop_path
-        drop_path_rate=args.drop_path,
-        drop_block_rate=args.drop_block,
-        global_pool=args.gp,
-        bn_tf=args.bn_tf,
-        bn_momentum=args.bn_momentum,
-        bn_eps=args.bn_eps,
-        checkpoint_path=args.initial_checkpoint,
-        img_size=args.img_size,
-        use_chk=args.use_chk)
+    if args.model.startswith('CSWin'):
+        model = create_model(
+            args.model,
+            pretrained=args.pretrained,
+            num_classes=args.num_classes,
+            drop_rate=args.drop,
+            drop_connect_rate=args.drop_connect,  # DEPRECATED, use drop_path
+            drop_path_rate=args.drop_path,
+            drop_block_rate=args.drop_block,
+            global_pool=args.gp,
+            bn_tf=args.bn_tf,
+            bn_momentum=args.bn_momentum,
+            bn_eps=args.bn_eps,
+            checkpoint_path=args.initial_checkpoint,
+            img_size=args.img_size,
+            use_chk=args.use_chk)
+    else :
+        model = build_model(args)
 
     def count_parameters(model):
         return sum(p.numel() for p in model.parameters() if p.requires_grad)
