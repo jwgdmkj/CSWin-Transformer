@@ -1,5 +1,6 @@
 from .shinepost import MyTransformer as MyT
 from .shinepost_v2 import MyTransformer as MyTv2
+from .shinepost_v3 import MyTransformer as MyTv3
 
 # first : swin처럼 7,7,7,7에 pos는 1,1,1,0씩 넣어보기(depth도 동일) 단, 1/2로 나눠야 하므로 num_heads는 cswin을 따라 (2,4,8,16)
 def build_model(args, is_pretrain = False):
@@ -8,7 +9,7 @@ def build_model(args, is_pretrain = False):
     import torch.nn as nn
 
     if model_type == 'shinepost_v1':
-        model = MyTv2(
+        model = MyTv3(
             img_size=args.img_size,
             in_chans=3,
             num_classes=1000,
@@ -28,6 +29,53 @@ def build_model(args, is_pretrain = False):
             # pos=[2, 2, 2, 0]
             pos=[1, 1, 1, 0]
         )
+        
+    # v2 : embedding이 96 -> 64
+    elif model_type == 'shinepost_v2':
+        model = MyTv3(
+            img_size = args.img_size,
+            in_chans = 3,
+            num_classes=1000,
+            embed_dim=64,
+            depth=[2,2,6,2],
+            # split_size=[2, 2, 2, 7],
+            split_size=[7, 7, 7, 7],
+            num_heads=[2,4,8,16],
+            mlp_ratio=4.,
+            qkv_bias=True,
+            qk_scale=None,
+            drop_rate=0.,
+            attn_drop_rate=0.,
+            drop_path_rate=0.,
+            norm_layer=nn.LayerNorm,
+            use_chk=False,
+            # pos=[2, 2, 2, 0]
+            pos=[1, 1, 1, 0]
+        )
+
+    # v3 : embedding은 64, split_size와 pos를 변경
+    elif model_type == 'shinepost_v3':
+        model = MyTv3(
+            img_size = args.img_size,
+            in_chans = 3,
+            num_classes=1000,
+            embed_dim=64,
+            depth=[2,2,6,2],
+            # split_size=[7, 7, 7, 7],
+            split_size=[2, 2, 2, 7],
+            num_heads=[2,4,8,16],
+            mlp_ratio=4.,
+            qkv_bias=True,
+            qk_scale=None,
+            drop_rate=0.,
+            attn_drop_rate=0.,
+            drop_path_rate=0.,
+            norm_layer=nn.LayerNorm,
+            use_chk=False,
+            pos=[2, 2, 2, 0]
+            # pos=[1, 1, 1, 0]
+        )
+
     else :
         raise NotImplementedError(f"Unknown model : {model_type}")
 
