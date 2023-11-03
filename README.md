@@ -1,3 +1,9 @@
+# What I add
+
+'''
+bash train.sh <GPUs> --data <ImageNet Dir> --model shinepost_v2 -b <Batch> --lr 1e-3 --weight-decay .05 --amp --img-size 224 --warmup-epochs 20 --model-ema-decay 0.99984 --drop-path 0.2
+'''
+
 # CSWin-Transformer, CVPR 2022
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/cswin-transformer-a-general-vision/semantic-segmentation-on-ade20k)](https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=cswin-transformer-a-general-vision)
